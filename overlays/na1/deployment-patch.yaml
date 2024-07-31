@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluxai-cloudflare
+spec:
+  template:
+    spec:
+      containers:
+      - name: fluxai8080
+        image: ghcr.io/huggingface/text-generation-inference:2.1.0
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+      - name: cloudflared
+        args:
+        - cloudflared
+        - tunnel
+        - --metrics
+        - 0.0.0.0:2000
+        - run
+        - --token
+        - new-token-value 
