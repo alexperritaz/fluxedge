@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        key: 84e54d443a
+        kubernetes.io/hostname: "<hostname>"
       containers:
       - name: fluxai8080
         image: ghcr.io/huggingface/text-generation-inference:2.1.0
