@@ -44,21 +44,3 @@ spec:
           value: "100"
         - name: MAX_TOTAL_TOKENS
           value: "500"
-      - name: cloudflared
-        image: cloudflare/cloudflared:latest
-        command:
-        - cloudflared
-        - tunnel
-        - --metrics
-        - 0.0.0.0:2000
-        - run
-        args:
-        - --token
-        - eyJhIjoiOThkNGMzYzRkZWNmMzc5ZGM0YTE4NjU0YThhYjZjYmYiLCJ0IjoiY2M3ZjA2ODktYzk2Ny00ODIwLTgyYjItOGZiNDMzNGRjMTI4IiwicyI6Ik56TXdZVGd3TURZdFl6RTJOUzAwTW1VeExXSTBNbVF0WWpSbE5qSXhNR016WmpobCJ9
-        livenessProbe:
-          httpGet:
-            path: /ready
-            port: 2000
-          failureThreshold: 1
-          initialDelaySeconds: 10
-          periodSeconds: 10
