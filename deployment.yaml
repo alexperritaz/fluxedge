@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluxai-cloudflare
+  labels:
+    app: fluxai-cloudflare
+spec:
+  selector:
+    matchLabels:
+      app: fluxai-cloudflare
+  template:
+    metadata:
+      labels:
+        app: fluxai-cloudflare
+    spec:
+      hostname: fluxai-cloudflare-pod  # Custom hostname for the pod
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+         - 8.8.8.8
+         - 1.1.1.1
+      hostNetwork: true  # Use the host's network
+      containers:
+      - name: edge1-4090-8080
+        image: ghcr.io/huggingface/text-generation-inference:2.0.4
+        args: ["--env"]
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+        - name: MODEL_ID
+          value: "TheBloke/CapybaraHermes-2.5-Mistral-7B-AWQ"
+        - name: SHARDED
+          value: "false"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: HF_HUB_ENABLE_HF_TRANSFER
+          value: "0"
+        - name: TRUST_REMOTE_CODE
+          value: "true"
+        - name: PORT
+          value: "8080"
+        - name: MAX_INPUT_LENGTH
+          value: "9000"
+        - name: MAX_TOTAL_TOKENS
+          value: "10000"
+      - name: cloudflared
+        image: cloudflare/cloudflared:latest
+        command:
+        - cloudflared
+        - tunnel
+        - --metrics
+        - 0.0.0.0:2000
+        - run
+        args:
+        - --token
+        - token
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: 2000
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
