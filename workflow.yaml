@@ -1,0 +1,116 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: fluxai-
+spec:
+  serviceAccountName: batch-job-sa
+  nodeSelector:
+    kubernetes.io/hostname: fe-na-dev-agent-1
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: repoUrl
+        value: "https://github.com/alexperritaz/fluxedge.git"
+      - name: repoBranch
+        value: "main"
+      - name: appVersion
+        value: "v1.0.0"
+      - name: environment
+        value: "production"
+      - name: cloudflare
+        value: "1"
+      - name: nodeSelector
+        value: "2030cb0b5f"
+
+  templates:
+  - name: main
+    steps:
+      - - name: clone-repo
+          template: clone-repo
+          arguments:
+            parameters:
+              - name: repoUrl
+                value: "{{workflow.parameters.repoUrl}}"
+              - name: repoBranch
+                value: "{{workflow.parameters.repoBranch}}"
+
+      - - name: kustomize-build
+          template: kustomize-build
+          arguments:
+            parameters:
+              - name: cloudflare
+                value: "{{workflow.parameters.cloudflare}}"
+              - name: nodeSelector
+                value: "{{workflow.parameters.nodeSelector}}"
+            artifacts:
+              - name: repo
+                from: "{{steps.clone-repo.outputs.artifacts.repo}}"
+
+      - - name: apply-kubectl
+          template: apply-kubectl
+          arguments:
+            artifacts:
+              - name: manifests
+                from: "{{steps.kustomize-build.outputs.artifacts.manifests}}"
+
+  - name: clone-repo
+    inputs:
+      parameters:
+        - name: repoUrl
+        - name: repoBranch
+    container:
+      image: alpine/git
+      command: [sh, -c]
+      args: [
+        "git clone --branch {{inputs.parameters.repoBranch}} {{inputs.parameters.repoUrl}} /workspace && \
+        ls /workspace"
+      ]
+    #   volumeMounts:
+    #     - name: ssh-key
+    #       mountPath: /secret
+    #       readOnly: true
+    # volumes:
+    #   - name: ssh-key
+    #     secret:
+    #       secretName: git-ssh-key
+    outputs:
+      artifacts:
+        - name: repo
+          path: /workspace
+
+  - name: kustomize-build
+    inputs:
+      parameters:
+        - name: cloudflare
+        - name: nodeSelector
+      artifacts:
+        - name: repo
+          path: /workspace
+    script:
+      image: line/kubectl-kustomize
+      command: [sh]
+      source: |
+        #!/bin/sh
+        cd /workspace/dev/overlay/dev
+        # Replace placeholders in kustomization.yaml with actual values
+        sed -i "s/\CLOUDFLARE_TOKEN/{{inputs.parameters.cloudflare}}/g" deployment-patch.yaml 
+        sed -i "s/\NODE_SELECTOR/{{inputs.parameters.nodeSelector}}/g" deployment-patch.yaml 
+        
+        # Generate the manifests using kustomize
+        kustomize build . -o /workspace/modified
+
+        ls /workspace/modified
+    outputs:
+      artifacts:
+        - name: manifests
+          path: /workspace/modified
+
+  - name: apply-kubectl
+    inputs:
+      artifacts:
+        - name: manifests
+          path: /workspace/modified
+    container:
+      image: bitnami/kubectl:1.21 
+      command: [sh, -c]
+      args: ["kubectl apply -f /workspace/modified"]
