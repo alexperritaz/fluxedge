@@ -23,7 +23,6 @@ spec:
       containers:
       - name: edge1-4090-8080
         image: ghcr.io/huggingface/text-generation-inference:2.0.4
-        args: ["--env"]
         resources:
           limits:
             nvidia.com/gpu: 1
