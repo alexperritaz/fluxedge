@@ -32,8 +32,6 @@ spec:
           value: "TheBloke/CapybaraHermes-2.5-Mistral-7B-AWQ"
         - name: SHARDED
           value: "false"
-        - name: QUANTIZE
-          value: "awq"
         - name: LOG_LEVEL
           value: "INFO"
         - name: HF_HUB_ENABLE_HF_TRANSFER
