@@ -22,6 +22,7 @@ spec:
       hostNetwork: true  # Use the host's network
       containers:
       - name: edge6-4090-8080
+        args: ["--env"]
         image: ghcr.io/huggingface/text-generation-inference:2.0.4
         resources:
           limits:
