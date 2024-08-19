@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        NODE_SELECTOR
+        kubernetes.io/hostname: NODE_SELECTOR
       containers:
       - name: edge1-4090-8080
         image: ghcr.io/huggingface/text-generation-inference:2.0.4
