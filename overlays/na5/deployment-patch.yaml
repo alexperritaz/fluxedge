@@ -6,11 +6,11 @@ spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/hostname: "d4ff17f8ee"
+        kubernetes.io/hostname: "78fea1345f"
       containers:
       - name: edge1-4090-8080
         image: ghcr.io/huggingface/text-generation-inference:2.0.4
       - name: cloudflared
         args:
         - --token
-        - eyJhIjoiOThkNGMzYzRkZWNmMzc5ZGM0YTE4NjU0YThhYjZjYmYiLCJ0IjoiY2M3ZjA2ODktYzk2Ny00ODIwLTgyYjItOGZiNDMzNGRjMTI4IiwicyI6Ik56TXdZVGd3TURZdFl6RTJOUzAwTW1VeExXSTBNbVF0WWpSbE5qSXhNR016WmpobCJ9
+        - eyJhIjoiOThkNGMzYzRkZWNmMzc5ZGM0YTE4NjU0YThhYjZjYmYiLCJ0IjoiOWFlZjZjNWEtNDk0Ny00YjY5LTk5ZmUtZDNmNmRmZDNiZTlmIiwicyI6Ik1Ua3pNRFk0WlRFdFl6RXlOQzAwTWpOaExXRTBaVEl0WkdNeFpqWTFZVFF6WlRZMyJ9
