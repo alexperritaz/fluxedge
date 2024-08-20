@@ -8,8 +8,31 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: "aecd3a80c0"
       containers:
-      - name: edge1-4090-8080
+      - name: edge-4090-8080
         image: ghcr.io/huggingface/text-generation-inference:2.0.4
+        args: ["--env"]
+        resources:
+         limits:
+            nvidia.com/gpu: 1 # Allocate 1 GPU
+        env:
+        - name: MODEL_ID
+          value: "TheBloke/CapybaraHermes-2.5-Mistral-7B-AWQ"
+        - name: SHARDED
+          value: "false"
+        - name: QUANTIZE
+          value: "awq"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: HF_HUB_ENABLE_HF_TRANSFER
+          value: "0"
+        - name: TRUST_REMOTE_CODE
+          value: "true"
+        - name: PORT
+          value: "8080"
+        - name: MAX_INPUT_TOKENS
+          value: "4000"
+        - name: MAX_TOTAL_TOKENS
+          value: "5000"
       - name: cloudflared
         args:
         - --token
